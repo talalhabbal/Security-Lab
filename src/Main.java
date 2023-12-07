@@ -7,15 +7,9 @@ import javax.crypto.Cipher;
 import javax.crypto.Mac;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.security.*;
 import java.security.cert.CertificateFactory;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import javax.crypto.*;
 
 public class Main {
     public static void main(String[] args) {
@@ -55,7 +49,7 @@ public class Main {
             boolean integrityVerified = computedHMACtoHex.equals(givenHMAC);
             boolean isVerified = verification();
 
-            
+
             String plaintext = new String(decryptedData, StandardCharsets.UTF_8);
             System.out.println("Decrypted Message: " + plaintext);
             System.out.println("Integrity Verified: " + integrityVerified);
