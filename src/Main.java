@@ -22,11 +22,10 @@ public class Main {
             byte[] encryptedHmacKey = Arrays.copyOfRange(ciphertext, 256, 384);
             byte[] encryptedData = Arrays.copyOfRange(ciphertext, 384, ciphertext.length);
 
-            //Decrypt using the private key from the keystore
+            //Decrypt The symmetric key and IV using the private key from the keystore
             KeyStore keystore = KeyStore.getInstance("JKS");
             keystore.load(new FileInputStream("C:\\Users\\talal\\Desktop\\Security Lab\\resources\\lab1Store"), "lab1StorePass".toCharArray());
             PrivateKey privateKey = (PrivateKey) keystore.getKey("lab1EncKeys", "lab1KeyPass".toCharArray());
-
             Cipher rsaCipher = Cipher.getInstance("RSA");
             rsaCipher.init(Cipher.DECRYPT_MODE, privateKey);
             byte[] symmetricKey = rsaCipher.doFinal(encryptedSymmetricKey);
@@ -50,6 +49,7 @@ public class Main {
             boolean integrityVerified = computedHMACtoHex.equals(givenHMAC);
             String plaintext = new String(decryptedData, StandardCharsets.UTF_8);
 
+            //Verify the digital signature
             byte[] ciph1 = Files.readAllBytes(Paths.get("C:\\Users\\talal\\Desktop\\Security Lab\\resources\\ciphertext.enc.sig1"));
             byte[] ciph2 = Files.readAllBytes(Paths.get("C:\\Users\\talal\\Desktop\\Security Lab\\resources\\ciphertext.enc.sig2"));
 
@@ -67,6 +67,7 @@ public class Main {
         }
     }
 
+    //verify digital signature
     public static boolean verification(String plaintext, byte[] ciph) {
         try {
             FileInputStream readPublicKey = new FileInputStream("C:\\Users\\talal\\Desktop\\Security Lab\\resources\\lab1Sign.cert");
@@ -84,14 +85,15 @@ public class Main {
             return false;
         }
     }
+
+    //Convert byte[] to hexadecimal represenation
     public static String bytesToHex(byte[] bytes) {
     StringBuilder hexString = new StringBuilder(2 * bytes.length);
 
     for (byte b : bytes) {
-        // Convert each byte to a two-digit hexadecimal representation
         String hex = Integer.toHexString(0xff & b);
         if (hex.length() == 1) {
-            hexString.append('0');  // Ensure that the string has two characters
+            hexString.append('0');
         }
         hexString.append(hex);
     }
