@@ -15,6 +15,7 @@ public class Main {
     public static void main(String[] args) {
         try {
             //Split the content of ciphertext.enc
+            //to get the data needed for decryption
             byte[] ciphertext = Files.readAllBytes(Paths.get("C:\\Users\\talal\\Desktop\\Security Lab\\resources\\ciphertext.enc"));
             byte[] encryptedSymmetricKey = Arrays.copyOfRange(ciphertext, 0, 128);
             byte[] encryptedIV = Arrays.copyOfRange(ciphertext, 128, 256);
@@ -47,27 +48,37 @@ public class Main {
             byte[] computedHmac = hmac.doFinal(decryptedData);
             String computedHMACtoHex = bytesToHex(computedHmac);
             boolean integrityVerified = computedHMACtoHex.equals(givenHMAC);
-            boolean isVerified = verification();
-
-
             String plaintext = new String(decryptedData, StandardCharsets.UTF_8);
+
+            byte[] ciph1 = Files.readAllBytes(Paths.get("C:\\Users\\talal\\Desktop\\Security Lab\\resources\\ciphertext.enc.sig1"));
+            byte[] ciph2 = Files.readAllBytes(Paths.get("C:\\Users\\talal\\Desktop\\Security Lab\\resources\\ciphertext.enc.sig2"));
+
+            boolean isVerified1 = verification(plaintext, ciph1);
+            boolean isVerified2 = verification(plaintext, ciph2);
+
             System.out.println("Decrypted Message: " + plaintext);
             System.out.println("Integrity Verified: " + integrityVerified);
-            System.out.println("Digital Signature Verified: " + isVerified);
+            System.out.println("Digital Signature Verified(File 1): " + isVerified1);
+            System.out.println("Digital Signature Verified(File 2): " + isVerified2);
+
 
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public static boolean verification() {
+    public static boolean verification(String plaintext, byte[] ciph) {
         try {
             FileInputStream readPublicKey = new FileInputStream("C:\\Users\\talal\\Desktop\\Security Lab\\resources\\lab1Sign.cert");
             CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
             X509Certificate x509Certificate = (X509Certificate) certificateFactory.generateCertificate(readPublicKey);
             PublicKey publickey = x509Certificate.getPublicKey();
-            x509Certificate.verify(publickey);
-            return true;
+            Signature sig = Signature.getInstance("SHA1withRSA");
+            boolean isVerified;
+            sig.initVerify(publickey);
+            sig.update(plaintext.getBytes());
+            isVerified = sig.verify(ciph);
+            return isVerified;
         } catch(Exception e) {
             e.printStackTrace();
             return false;
